@@ -4,11 +4,15 @@ import Title from '../components/Title'
 import { assets } from '../assets/assets'
 import CartTotal from '../components/CartTotal'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+
 const Cart = () => {
 
-  const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
+  const { products, currency, cartItems, updateQuantity, navigate, backendUrl, getCartAmount, setDiscountData, discountData } = useContext(ShopContext);
 
   const [cartData, setCartData] = useState([]);
+  const [voucherCode, setVoucherCode] = useState('');
 
   useEffect(() => {
 
@@ -30,6 +34,37 @@ const Cart = () => {
 
 
   }, [cartItems])
+
+  const applyVoucherHandler = async () => {
+    if (!voucherCode.trim()) {
+      toast.error('Vui lòng nhập mã giảm giá');
+      return;
+    }
+    try {
+      const response = await axios.post(backendUrl + '/api/voucher/apply', {
+        code: voucherCode,
+        orderValue: getCartAmount()
+      });
+
+      if (response.data.success) {
+        setDiscountData(response.data.voucher);
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+        setDiscountData(null);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || error.message);
+      setDiscountData(null);
+    }
+  }
+
+  const removeVoucherHandler = () => {
+    setDiscountData(null);
+    setVoucherCode('');
+    toast.info('Đã hủy áp dụng mã giảm giá');
+  }
 
   return (
     <div className='border-t pt-14'>
@@ -68,6 +103,26 @@ const Cart = () => {
 
         <div className='flex justify-end my-20'>
           <div className='w-full sm:w-[450px]'>
+            {/* Voucher Input Section */}
+            <div className='mb-6'>
+              <p className='text-sm text-gray-600 mb-2'>Nếu bạn có mã giảm giá, vui lòng nhập ở đây:</p>
+              <div className='flex gap-2'>
+                <input 
+                  type="text" 
+                  className='border border-gray-300 px-3 py-2 w-full uppercase' 
+                  placeholder='MÃ GIẢM GIÁ'
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                  disabled={discountData !== null}
+                />
+                {discountData ? (
+                  <button onClick={removeVoucherHandler} className='bg-red-500 text-white px-6 py-2 text-sm'>HỦY BỎ</button>
+                ) : (
+                  <button onClick={applyVoucherHandler} className='bg-black text-white px-6 py-2 text-sm'>ÁP DỤNG</button>
+                )}
+              </div>
+            </div>
+
             <CartTotal />
             <div className='w-full text-end'>
               <button onClick={() => navigate('/place-order')} className='bg-black text-white text-sm my-8 px-8 py-3'>PROCEED TO CHECKOUT</button>

@@ -15,6 +15,7 @@ const ShopContextProvider = (props) => {
     const [cartItems,setCartItems] = useState({});
     const [products, setProducts] = useState([]);
     const [token,setToken] = useState('')
+    const [discountData, setDiscountData] = useState(null)
     const navigate = useNavigate();
 
     const addToCart = async (itemId,size) => {
@@ -153,13 +154,33 @@ const ShopContextProvider = (props) => {
         return totalAmount; 
     }
 
+    const getDiscountAmount = () => {
+        if (!discountData) return 0;
+        
+        let subtotal = getCartAmount();
+        let discount = 0;
+
+        if (discountData.discountType === 'percentage') {
+            discount = (subtotal * discountData.discountValue) / 100;
+            if (discountData.maxDiscount && discount > discountData.maxDiscount) {
+                discount = discountData.maxDiscount;
+            }
+        } else if (discountData.discountType === 'fixed') {
+            discount = discountData.discountValue;
+        }
+
+        // Đảm bảo không giảm quá tổng tiền
+        return discount > subtotal ? subtotal : discount;
+    }
+
     const value = {  
         products , currency, delivery_fee,
         search,setSearch,showSearch,setShowSearch,
         cartItems,addToCart,setCartItems,
         getCartCount,updateQuantity,
         getCartAmount, navigate , backendUrl,
-        setToken,token
+        setToken,token,
+        discountData, setDiscountData, getDiscountAmount
     }
 
     return  (

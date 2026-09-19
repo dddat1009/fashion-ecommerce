@@ -8,7 +8,7 @@ import axios from 'axios'
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
-  const { navigate, backendUrl, token, cartItems, setCartItems, getCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+  const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products, getDiscountAmount, discountData } = useContext(ShopContext);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -45,31 +45,39 @@ const PlaceOrder = () => {
           }
         }
       }
+      const subtotal = getCartAmount();
+      const discount = getDiscountAmount();
+      const totalAmount = subtotal === 0 ? 0 : subtotal - discount + delivery_fee;
+
       let orderData = {
         address: formData,
         items: orderItems,
-        amount: getCartAmount() + delivery_fee
+        amount: totalAmount
+      }
+
+      if (discountData) {
+        orderData.voucherCode = discountData.code;
       }
 
       switch (method) {
 
         // API Calls for cod
         case 'cod':
-          const response = await axios.post(backendUrl + '/api/order/place',orderData,{headers:{token}})
+          const response = await axios.post(backendUrl + '/api/order/place', orderData, { headers: { token } })
           console.log(response.data);
-          
+
           if (response.data.success) {
             setCartItems({})
             navigate('/orders')
-          } else {  
+          } else {
             toast.error(response.data.message)
           }
           break;
 
-          case 'stripe':
+        case 'stripe':
           // Lưu ý: Đảm bảo endpoint '/api/order/stripe' khớp với route bạn đã khai báo ở backend
           const responseStripe = await axios.post(backendUrl + '/api/order/stripe', orderData, { headers: { token } })
-          
+
           if (responseStripe.data.success) {
             const { session_url } = responseStripe.data;
             // Bắt buộc phải có dòng này để chuyển hướng sang cổng thanh toán
@@ -83,9 +91,9 @@ const PlaceOrder = () => {
           break;
       }
 
-    } catch (error) { 
-        console.log(error)
-        toast.error(error.message)
+    } catch (error) {
+      console.log(error)
+      toast.error(error.message)
     }
   }
 

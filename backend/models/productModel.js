@@ -9,7 +9,9 @@ const productSchema = new mongoose.Schema({
     subCategory: { type: String, required:true },
     sizes: { type: Array, required:true },
     bestseller: {type:Boolean, default: false},
-    date: {type: Number, required: true}
+    date: {type: Number, required: true},
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: false }, // Cho phép false tạm thời để không lỗi dữ liệu cũ
+    status: { type: String, default: 'pending' } // 'pending', 'approved', 'rejected'
 
 })
 
