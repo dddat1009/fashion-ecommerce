@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary"
 import productModel from "../models/productModel.js"
 import inventoryModel from "../models/inventoryModel.js"
+import shopModel from "../models/shopModel.js"
 // function for add product
 const addProduct = async (req, res) => {
     try {
@@ -119,20 +120,30 @@ const removeProduct = async (req, res) => {
 
 // function for single product info
 const singleProduct = async (req, res) => {
-
     try {
-
         const { productId } = req.body
         const product = await productModel.findById(productId)
-        res.json({ success: true, product })
+        if (!product) {
+            return res.json({ success: false, message: "Không tìm thấy sản phẩm" })
+        }
+
+        let shopInfo = null;
+        if (product.sellerId) {
+            shopInfo = await shopModel.findOne({ userId: product.sellerId }).select("name email address avatar rating isVerified")
+        }
+
+        res.json({
+            success: true,
+            product: {
+                ...product.toObject(),
+                shopInfo: shopInfo || { name: "Forever Store" }
+            }
+        })
 
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
-
     }
-
-
 }
 
 export { listProducts, addProduct, removeProduct, singleProduct, listSellerProducts }

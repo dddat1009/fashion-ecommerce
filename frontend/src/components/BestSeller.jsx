@@ -33,6 +33,7 @@
               name={item.name} 
               image={item.image} 
               price={item.price} 
+              shopInfo={item.shopInfo}
           />
       ))} 
         </div>

@@ -3,10 +3,14 @@ import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Title from '../components/Title'
 import ProductItem from '../components/ProductItem'
+import { useSearchParams } from 'react-router-dom'
 
 const Collection = () => {
 
   const { products , search , showSearch } = useContext(ShopContext);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const shopParam = searchParams.get('shop');
+
   const [showFilter, setShowFilter] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
@@ -36,6 +40,11 @@ const Collection = () => {
   const applyFilter = () => {
 
     let productsCopy = products.slice();
+
+    // Lọc theo Shop nếu có tham số shop trên URL (ví dụ: /collection?shop=SHOP+A)
+    if (shopParam) {
+      productsCopy = productsCopy.filter(item => item.shopInfo?.name === shopParam);
+    }
 
     if(showSearch && search) {
       productsCopy = productsCopy.filter(item => item.name.toLowerCase().includes(search.toLowerCase())  )  
@@ -72,7 +81,7 @@ const Collection = () => {
   }
 useEffect(()=>{
     applyFilter();
-},[category,subCategory,search,showSearch, products])
+},[category,subCategory,search,showSearch, products, shopParam])
 
 useEffect(()=>{
   sortProduct();
@@ -133,11 +142,29 @@ return (
         </select>
 
       </div>
+
+      {/* Thông báo bộ lọc Shop nếu đang lọc theo Shop */}
+      {shopParam && (
+        <div className='flex items-center justify-between bg-orange-50 border border-orange-200 px-4 py-2.5 rounded-lg mb-5 text-sm'>
+          <div className='flex items-center gap-2'>
+            <span className='text-base'>🏪</span>
+            <span className='text-gray-600'>Đang xem sản phẩm của:</span>
+            <span className='font-bold text-orange-600'>{shopParam}</span>
+          </div>
+          <button 
+            onClick={() => setSearchParams({})} 
+            className='text-xs text-gray-500 hover:text-red-500 underline font-medium cursor-pointer'
+          >
+            ✕ Xóa lọc shop
+          </button>
+        </div>
+      )}
+
       {/* Map Products*/}
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
         {
           filterProducts.map((item, index) => (
-            <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image} />
+            <ProductItem key={index} name={item.name} id={item._id} price={item.price} image={item.image} shopInfo={item.shopInfo} />
 
           ))
         }

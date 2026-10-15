@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
 import axios from 'axios';
@@ -8,6 +8,7 @@ import axios from 'axios';
 const Product = () => {
 
   const {productId} = useParams();
+  const navigate = useNavigate();
   const {products,currency,addToCart,backendUrl} = useContext(ShopContext);
   const [productData,setProductData] = useState(false); 
   const [image,setImage] = useState('')
@@ -62,20 +63,57 @@ const Product = () => {
 
         {/* ---------product infor ----------*/}
         <div className='flex-1'>
-            <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
-            <p className='text-sm text-gray-500 mt-1 mb-2'>
-                Được bán bởi: <span className='text-black font-semibold'>{productData.shopInfo ? productData.shopInfo.name : 'Forever Store'}</span>
-            </p>
+            <h1 className='font-medium text-2xl mt-2 text-gray-900'>{productData.name}</h1>
+            
             <div className='flex items-center gap-1 mt-2'>
-                <img src={assets.star_icon} alt="" className="w-3 5" />
-                <img src={assets.star_icon} alt="" className="w-3 5" />
-                <img src={assets.star_icon} alt="" className="w-3 5" />
-                <img src={assets.star_icon} alt="" className="w-3 5" />
-                <img src={assets.star_dull_icon} alt="" className="w-3 5" />
-                <p className='pl-2'>(122)</p>
+                <img src={assets.star_icon} alt="" className="w-3.5" />
+                <img src={assets.star_icon} alt="" className="w-3.5" />
+                <img src={assets.star_icon} alt="" className="w-3.5" />
+                <img src={assets.star_icon} alt="" className="w-3.5" />
+                <img src={assets.star_dull_icon} alt="" className="w-3.5" />
+                <p className='pl-2 text-sm text-gray-500'>(122 đánh giá)</p>
             </div>
-            <p className='mt-5 text-3xl font-medium '>{currency}{productData.price}</p>
-            <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
+            
+            <p className='mt-4 text-3xl font-semibold text-gray-900'>{currency}{productData.price}</p>
+            
+            {/* Khối Seller Card (Thông tin Shop) */}
+            <div className='flex items-center justify-between p-4 my-5 border border-gray-200 rounded-xl bg-gray-50/70 hover:border-orange-200 transition'>
+              <div className='flex items-center gap-3.5'>
+                <div className='w-12 h-12 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center font-bold text-lg shadow-xs overflow-hidden flex-shrink-0'>
+                  {productData.shopInfo?.avatar ? (
+                    <img src={productData.shopInfo.avatar} alt="Shop Avatar" className='w-full h-full object-cover' />
+                  ) : (
+                    (productData.shopInfo?.name ? productData.shopInfo.name.charAt(0).toUpperCase() : 'S')
+                  )}
+                </div>
+                <div>
+                  <div className='flex items-center gap-2 flex-wrap'>
+                    <h3 className='font-semibold text-gray-900 text-base'>
+                      {productData.shopInfo?.name || 'Forever Store'}
+                    </h3>
+                    <span className='bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-green-200'>
+                      ✓ Shop Uy Tín
+                    </span>
+                  </div>
+                  <p className='text-xs text-gray-500 mt-0.5 flex items-center gap-2'>
+                    <span>📍 {productData.shopInfo?.address || 'Hà Nội, Việt Nam'}</span>
+                    <span>•</span>
+                    <span className='text-amber-600 font-medium'>★ 4.9</span>
+                  </p>
+                </div>
+              </div>
+
+              {productData.shopInfo?.name && (
+                <button 
+                  onClick={() => navigate(`/collection?shop=${encodeURIComponent(productData.shopInfo.name)}`)}
+                  className='ml-2 px-3.5 py-1.5 text-xs font-semibold text-orange-600 border border-orange-500 rounded-lg hover:bg-orange-500 hover:text-white transition duration-200 cursor-pointer flex-shrink-0'
+                >
+                  Xem Shop
+                </button>
+              )}
+            </div>
+
+            <p className='mt-2 text-gray-600 text-sm md:w-4/5 leading-relaxed'>{productData.description}</p>
             <div className='flex flex-col gap-4 my-8'>
                 <p className='font-medium text-sm text-gray-700'>Chọn Kích Cỡ (Size):</p>
                 <div className='flex flex-wrap gap-2'>
