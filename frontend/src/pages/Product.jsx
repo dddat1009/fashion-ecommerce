@@ -14,6 +14,15 @@ const Product = () => {
   const [size,setSize] = useState('')
   const [stockBySize, setStockBySize] = useState({});
 
+  const fetchProductData = async () => {
+    products.forEach((item) => {
+      if (item._id === productId) {
+        setProductData(item);
+        setImage(item.image[0]);
+      }
+    });
+  };
+
   const fetchProductStock = async () => {
     try {
       const response = await axios.get(`${backendUrl}/api/inventory/stock/${productId}`);
