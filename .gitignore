@@ -1,4 +1,12 @@
-node_modules
+node_modules/
+.env
+*.env
+.DS_Store
+dist/
+build/
+*.log
 backend/Redis.zip
 backend/redis-local/
-*.env
+test.js
+backend/test.js
+test_prod.json

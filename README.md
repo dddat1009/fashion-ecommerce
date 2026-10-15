@@ -1,481 +1,181 @@
-# Fashion E-commerce Platform
+# 🛍️ Nền Tảng Thương Mại Điện Tử Đa Người Bán (Multi-Vendor E-Commerce Platform)
 
-A full-stack fashion e-commerce platform built with **React.js, Node.js, Express.js, and MongoDB**. The system includes a customer-facing shopping website, an administration dashboard, RESTful APIs, authentication, product management, order processing, image uploads, and online payment integration.
+Hệ thống sàn thương mại điện tử hiện đại, hỗ trợ mô hình đa người bán (Multi-Vendor), tích hợp quản lý kho hàng đa chi nhánh, kiểm soát xuất - nhập - tồn kho tự động theo thời gian thực, tách đơn hàng (Split Orders), hệ thống ví doanh thu và thanh toán trực tuyến.
 
-## 📌 Overview
+---
 
-This project is designed for a fashion/clothing store to manage online shopping operations from product browsing to order processing.
+## 🌟 Tính Năng Nổi Bật
 
-The system consists of three main applications:
+### 1. 🏢 Quản Lý Kho Hàng & Tồn Kho (Warehouse & Inventory)
+- **Quản lý đa kho hàng**: Mỗi Shop có thể sở hữu nhiều kho hàng, thiết lập kho xuất hàng mặc định (`isDefault`).
+- **Kiểm soát tồn kho theo Size**: Quản lý số lượng khả dụng (`quantity`) và số lượng đang giữ cho đơn hàng (`reservedQuantity`) chi tiết đến từng kích cỡ sản phẩm.
+- **Khởi tạo & Nhập hàng**: Dễ dàng tạo mới tồn kho hoặc cộng dồn số lượng hàng về kho (`/api/inventory/import`).
+- **Kiểm kê & Cân kho**: Điều chỉnh số lượng thực tế kiểm đếm, tự động tính chênh lệch thừa/thiếu và ghi lại lý do kiểm kê.
+- **Lưu vết biến động kho (Stock Logs)**: Tự động ghi lại toàn bộ lịch sử: `IMPORT` (Nhập kho), `EXPORT_ORDER` (Xuất bán), `CANCEL_ORDER` (Hoàn hàng hủy), `ADJUSTMENT` (Kiểm kê).
+- **Cập nhật thời gian thực trên Frontend**: Tự động gạch ngang và vô hiệu hóa nút Size đã hết hàng; cảnh báo còn ít sản phẩm khi khách xem hàng.
 
-* **Customer Frontend** — Online shopping interface for customers
-* **Admin Dashboard** — Product and order management for administrators
-* **Backend API** — RESTful API, authentication, database and payment services
+### 2. 🏪 Hệ Thống Đa Người Bán (Multi-Vendor)
+- **Phân quyền 3 cấp (Role-Based Access Control)**:
+  - **Khách hàng (User)**: Xem sản phẩm, đặt hàng, áp dụng voucher, theo dõi đơn hàng, đăng ký nâng cấp mở Shop.
+  - **Người bán (Seller)**: Quản lý hồ sơ Shop, danh sách sản phẩm, quản lý kho hàng, xuất nhập tồn, quản lý đơn hàng của shop, tạo yêu cầu rút tiền từ ví.
+  - **Quản trị viên (Admin)**: Quản lý toàn bộ hệ thống, duyệt/từ chối yêu cầu rút tiền của Seller, tạo voucher khuyến mãi toàn sàn, xem thống kê tổng thể.
+- **Bảo mật Tenant chéo (Anti Cross-tenant Leak)**: Mọi thao tác kho, tồn kho, sản phẩm và đơn hàng đều được kiểm tra quyền sở hữu thông qua JWT Token trên server.
 
-## ✨ Features
+### 3. 📦 Tách Đơn Hàng Thông Minh (Split Orders)
+- Khách hàng có thể mua sản phẩm từ nhiều Shop khác nhau trong cùng 1 giỏ hàng.
+- Hệ thống tự động tách thành các đơn hàng con độc lập theo từng `shopId`.
+- **Tự động trừ kho**: Trừ số lượng tồn kho khả dụng ngay khi đặt hàng thành công.
+- **Tự động hoàn kho**: Tự động hoàn trả số lượng vào kho khi đơn hàng bị Hủy (`Cancelled`).
 
-### Customer Website
+### 4. 💳 Ví Tiền & Rút Tiền (Wallet & Withdrawal)
+- Khi đơn hàng hoàn thành (`Delivered`), tiền tự động được giải ngân vào ví người bán (`walletBalance`).
+- Người bán gửi yêu cầu rút tiền về tài khoản ngân hàng.
+- Admin xem xét thông tin tài khoản và duyệt (`Approved`) hoặc từ chối (`Rejected` - tự động hoàn tiền về ví người bán).
 
-* User registration and login
-* JWT-based authentication
-* Browse products by category and collection
-* Product search
-* Product details
-* Related products
-* Shopping cart
-* Quantity management
-* Checkout and order placement
-* Cash on Delivery
-* Stripe payment integration
-* Order history
-* Order verification
-* Responsive user interface
-* Toast notifications for user actions
+### 5. 🎟️ Mã Giảm Giá (Vouchers)
+- Quản lý mã giảm giá theo tỷ lệ phần trăm hoặc số tiền cố định.
+- Giới hạn đơn hàng tối thiểu, mức giảm tối đa, thời hạn hiệu lực và số lần sử dụng.
 
-### Admin Dashboard
+---
 
-* Admin authentication
-* Product management
-* Add new products
-* Upload product images
-* Remove products
-* View product list
-* Order management
-* View customer orders
-* Update order status
-* Dashboard for store administration
+## 🛠️ Công Nghệ Sử Dụng (Tech Stack)
 
-### Backend
+| Thành phần | Công nghệ |
+| :--- | :--- |
+| **Frontend & Admin** | React 19, Vite, Tailwind CSS, React Router v7, React Toastify, Recharts, Lucide Icons |
+| **Backend API** | Node.js, Express.js (ES Modules), JWT Authentication, Multer |
+| **Database & Cache** | MongoDB (Mongoose ODM), Redis |
+| **Lưu trữ & Thanh toán** | Cloudinary (Hình ảnh), Stripe API (Thanh toán quốc tế) |
+| **Triển khai & Vận hành** | Docker, Docker Compose |
 
-* RESTful API architecture
-* User authentication and authorization
-* JWT token authentication
-* Password hashing with bcrypt
-* Product CRUD operations
-* Order management
-* Cart management
-* MongoDB database integration
-* Cloudinary image upload
-* Stripe payment integration
-* Razorpay integration
-* CORS configuration
-* Environment variable configuration
-* Request validation
+---
 
-## 🛠️ Tech Stack
+## 📁 Cấu Trúc Dự Án
 
-### Frontend
-
-* React.js
-* React Router
-* Axios
-* React Toastify
-* Tailwind CSS
-* Vite
-
-### Admin Dashboard
-
-* React.js
-* React Router
-* Axios
-* React Toastify
-* Tailwind CSS
-* Vite
-
-### Backend
-
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* JWT
-* bcrypt
-* Multer
-* Cloudinary
-* Stripe
-* Razorpay
-* dotenv
-* CORS
-* Validator
-
-## 🏗️ System Architecture
-
-```text
-                         ┌─────────────────────┐
-                         │   Customer Frontend │
-                         │   React + Vite      │
-                         └──────────┬──────────┘
-                                    │
-                                    │ REST API
-                                    ▼
-                         ┌─────────────────────┐
-                         │      Backend API    │
-                         │ Node.js + Express   │
-                         └──────┬──────┬───────┘
-                                │      │
-                    ┌───────────┘      └────────────┐
-                    ▼                               ▼
-          ┌──────────────────┐             ┌─────────────────┐
-          │     MongoDB      │             │ Payment Services│
-          │    Database      │             │ Stripe/Razorpay │
-          └──────────────────┘             └─────────────────┘
-                               
-                         ┌─────────────────────┐
-                         │    Admin Dashboard  │
-                         │    React + Vite     │
-                         └──────────┬──────────┘
-                                    │
-                                    │ REST API
-                                    ▼
-                         ┌─────────────────────┐
-                         │      Backend API    │
-                         └─────────────────────┘
-
-                         ┌─────────────────────┐
-                         │      Cloudinary     │
-                         │   Image Storage     │
-                         └─────────────────────┘
 ```
-
-## 📂 Project Structure
-
-```text
-fashion-ecommerce/
-│
-├── frontend/
+doan/
+├── admin/                  # Giao diện Quản trị dành cho Admin & Người Bán (Port: 5174)
 │   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── context/
-│   │   ├── pages/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
-│
-├── admin/
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
-│
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── uploads/
-│   ├── server.js
+│   │   ├── pages/          # Dashboard, Warehouse, Inventory, Orders, List, Add, Voucher...
+│   │   ├── components/     # Navbar, Sidebar, Login...
+│   │   └── App.jsx
 │   └── package.json
 │
-├── .gitignore
+├── frontend/               # Giao diện Cửa hàng dành cho Khách hàng (Port: 5173)
+│   ├── src/
+│   │   ├── pages/          # Home, Collection, Product, Cart, PlaceOrder, Orders, Verify...
+│   │   ├── components/     # BestSeller, LatestCollection, CartTotal...
+│   │   └── context/        # ShopContext (Quản lý giỏ hàng, xác thực, API)
+│   └── package.json
+│
+├── backend/                # Server REST API (Port: 4000)
+│   ├── config/             # Kết nối MongoDB, Cloudinary, Redis
+│   ├── controllers/        # Điều khiển: inventory, warehouse, order, product, shop, voucher...
+│   ├── middleware/         # Xác thực: authUser, sellerAuth, adminAuth
+│   ├── models/             # Mongoose Schemas: inventory, warehouse, order, product, shop...
+│   ├── routes/             # API Endpoints
+│   ├── assignProducts.js   # Script tự động phân bổ sản phẩm vào các shop
+│   └── server.js
+│
+├── docker-compose.yml      # Cấu hình container hóa Redis, Backend, Frontend, Admin
 └── README.md
 ```
 
-## 🚀 Getting Started
+---
 
-### 1. Clone the repository
+## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy
+
+### Cách 1: Khởi chạy nhanh bằng Docker Compose (Khuyên Dùng)
+
+Đảm bảo bạn đã cài đặt Docker và Docker Desktop trên máy:
 
 ```bash
-git clone https://github.com/dddat1009/fashion-ecommerce.git
-cd fashion-ecommerce
+# 1. Clone repository về máy
+git clone <URL_REPOSITORY>
+cd doan
+
+# 2. Khởi chạy toàn bộ hệ thống (Redis, Backend, Frontend, Admin)
+docker-compose up --build
 ```
 
-### 2. Install Backend Dependencies
+Sau khi chạy xong:
+- **Giao diện Khách hàng**: [http://localhost:5173](http://localhost:5173)
+- **Giao diện Quản trị / Người Bán**: [http://localhost:5174](http://localhost:5174)
+- **Backend API**: [http://localhost:4000](http://localhost:4000)
 
+---
+
+### Cách 2: Khởi chạy thủ công từng dịch vụ (Development Mode)
+
+#### 1. Cấu hình Backend:
+Tạo file `backend/.env`:
+```env
+MONGODB_URI="mongodb+srv://<username>:<password>@cluster0.mongodb.net/e-commerce"
+CLOUDINARY_API_KEY="your_api_key"
+CLOUDINARY_SECRET_KEY="your_secret_key"
+CLOUDINARY_NAME="your_cloud_name"
+JWT_SECRET="your_jwt_secret"
+ADMIN_EMAIL="admin@forever.com"
+ADMIN_PASSWORD="your_admin_password"
+STRIPE_SECRET_KEY="your_stripe_key"
+```
+
+Cài đặt và chạy server:
 ```bash
 cd backend
 npm install
+npm run server    # Chạy trên port 4000
 ```
 
-### 3. Install Frontend Dependencies
-
-Open a new terminal:
-
-```bash
-cd frontend
-npm install
-```
-
-### 4. Install Admin Dependencies
-
-Open another terminal:
-
+#### 2. Cấu hình Admin:
 ```bash
 cd admin
 npm install
+npm run dev       # Chạy trên port 5173 hoặc 5174
 ```
 
-## 🔐 Environment Variables
-
-Environment variables are required for the backend, frontend and admin applications.
-
-For security reasons, real `.env` files are **not included in this repository**.
-
-### Backend
-
-Create:
-
-```text
-backend/.env
-```
-
-Example:
-
-```env
-MONGODB_URI=your_mongodb_connection_string
-
-CLOUDINARY_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_SECRET_KEY=your_cloudinary_secret_key
-
-JWT_SECRET=your_jwt_secret
-
-ADMIN_EMAIL=your_admin_email
-ADMIN_PASSWORD=your_admin_password
-
-STRIPE_SECRET_KEY=your_stripe_secret_key
-```
-
-### Frontend
-
-Create:
-
-```text
-frontend/.env
-```
-
-Example:
-
-```env
-VITE_BACKEND_URL=http://localhost:4000
-```
-
-### Admin
-
-Create:
-
-```text
-admin/.env
-```
-
-Example:
-
-```env
-VITE_BACKEND_URL=http://localhost:4000
-```
-
-> Never commit `.env` files or API keys to GitHub.
-
-## ▶️ Running the Application
-
-The project contains three applications that need to run simultaneously.
-
-### Start Backend
-
-```bash
-cd backend
-npm run server
-```
-
-The backend API will run on the configured local port.
-
-### Start Customer Frontend
-
+#### 3. Cấu hình Frontend:
 ```bash
 cd frontend
-npm run dev
+npm install
+npm run dev       # Chạy trên port 5173
 ```
 
-Vite will provide a local development URL.
+---
 
-### Start Admin Dashboard
+## 📋 Danh Sách Tài Khoản Thử Nghiệm
 
-```bash
-cd admin
-npm run dev
-```
+| Vai trò | Email đăng nhập | Mật khẩu | Quyền hạn |
+| :--- | :--- | :--- | :--- |
+| **Admin Quản Trị** | `admin@forever.com` | `qwerty123` | Toàn quyền hệ thống, duyệt rút tiền, tạo voucher toàn sàn |
+| **Seller (SHOP A)** | `shop1@gmail.com` | `12345678` | Quản lý SHOP A, quản lý kho & tồn kho riêng |
+| **Seller (shop B)** | `shop2@gmail.com` | `12345678` | Quản lý shop B, quản lý kho & tồn kho riêng |
+| **Seller (SHOP C)** | `shop3@gmail.com` | `12345678` | Quản lý SHOP C, quản lý kho & tồn kho riêng |
 
-The admin dashboard will run on its own Vite development port.
+---
 
-## 💳 Payment Integration
+## 📖 API Reference Tóm Tắt
 
-The application includes online payment integration using:
+### Kho Hàng (Warehouse)
+- `GET /api/warehouse/list` - Lấy danh sách kho hàng (Headers: `token`).
+- `POST /api/warehouse/create` - Tạo kho mới (`shopId, name, address, city, phone, isDefault`).
+- `POST /api/warehouse/update` - Cập nhật thông tin kho hàng.
+- `POST /api/warehouse/delete` - Xóa kho hàng (chỉ cho phép khi tồn kho = 0).
 
-* Stripe
-* Razorpay
+### Tồn Kho (Inventory)
+- `GET /api/inventory` - Lấy danh sách tồn kho (lọc theo `warehouseId`, `productId`).
+- `GET /api/inventory/stock/:productId` - Lấy số lượng tồn theo từng Size (Public cho khách xem).
+- `POST /api/inventory/create` - Khởi tạo tồn kho ban đầu cho sản phẩm & size.
+- `POST /api/inventory/import` - Nhập thêm số lượng hàng (cộng dồn).
+- `POST /api/inventory/adjust` - Cân kho / Kiểm kê thực tế (gán số lượng mới & tính chênh lệch).
 
-Payment credentials must be configured through environment variables.
+### Đơn Hàng (Orders)
+- `POST /api/order/place` - Đặt hàng thanh toán khi nhận hàng (COD), tự động tách đơn theo Shop và trừ kho.
+- `POST /api/order/stripe` - Đặt hàng qua cổng thanh toán Stripe.
+- `POST /api/order/list` - Lấy danh sách đơn hàng cho Admin & Người bán.
+- `POST /api/order/status` - Cập nhật trạng thái đơn (tự động hoàn kho khi `Cancelled`, giải ngân ví khi `Delivered`).
 
-For development and testing, use the appropriate test/sandbox credentials provided by the payment providers.
+---
 
-## 🖼️ Image Management
-
-Product images are uploaded and managed using **Cloudinary**.
-
-The backend handles image uploads and stores the resulting image information for use by the frontend.
-
-## 🔒 Authentication & Authorization
-
-The application uses **JWT (JSON Web Token)** for authentication.
-
-The authentication flow includes:
-
-```text
-User Login
-    ↓
-Backend validates credentials
-    ↓
-JWT token generated
-    ↓
-Token stored by client
-    ↓
-Token sent with protected API requests
-    ↓
-Backend middleware validates token
-    ↓
-Authorized request
-```
-
-Passwords are hashed using **bcrypt** before being stored.
-
-Admin functionality is protected using authentication and authorization middleware.
-
-## 🗄️ Database
-
-The project uses **MongoDB** with **Mongoose** for database management.
-
-Main data entities include:
-
-* Users
-* Products
-* Orders
-* Cart information
-
-Mongoose is used to define schemas and interact with MongoDB.
-
-## 📡 API
-
-The backend provides RESTful API endpoints for major application operations, including:
-
-```text
-Authentication
-├── User registration
-├── User login
-└── Authentication verification
-
-Products
-├── Add product
-├── List products
-├── Remove product
-└── Product information
-
-Cart
-├── Add to cart
-├── Update cart
-└── Retrieve cart
-
-Orders
-├── Create order
-├── Retrieve user orders
-├── Verify order
-└── Update order status
-
-Payments
-├── Stripe payment
-└── Razorpay payment
-```
-
-## 📱 Responsive Design
-
-The customer-facing website is designed to provide a responsive shopping experience across:
-
-* Desktop
-* Tablet
-* Mobile devices
-
-## 🧪 Development
-
-### Build Frontend
-
-```bash
-cd frontend
-npm run build
-```
-
-### Build Admin
-
-```bash
-cd admin
-npm run build
-```
-
-### Run Linter
-
-```bash
-npm run lint
-```
-
-## 📈 Future Improvements
-
-Potential improvements for future versions include:
-
-* Complete Razorpay payment flow
-* Product reviews and ratings
-* Wishlist functionality
-* Advanced product filtering
-* Pagination and optimized product queries
-* Inventory/stock management
-* Discount and voucher management
-* Sales analytics
-* Email notifications
-* Improved API validation and error handling
-* Automated testing
-* Docker containerization
-* CI/CD pipeline
-* Production deployment
-
-## 🎯 Learning Outcomes
-
-Through this project, I practiced:
-
-* Full-stack web application development
-* RESTful API design
-* React component architecture
-* State management
-* Authentication and authorization
-* MongoDB database design
-* CRUD operations
-* Payment gateway integration
-* Cloud image storage
-* Environment variable management
-* Git and GitHub workflow
-* Frontend and backend integration
-
-## 📸 Screenshots
-
-Screenshots of the customer website and admin dashboard can be added here.
-
-### Customer Website
-
-*Add screenshots here.*
-
-### Admin Dashboard
-
-*Add screenshots here.*
-
-## 👨‍💻 Author
-
-**dddat1009**
-
-GitHub:
-https://github.com/dddat1009
-
-## 📄 License
-
-This project was developed for educational and portfolio purposes.
+## 📝 Giấy Phép
+Dự án được phát triển phục vụ mục đích học tập và xây dựng nền tảng thương mại điện tử đa người bán.

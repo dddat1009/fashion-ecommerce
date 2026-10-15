@@ -2,7 +2,7 @@ import userModel from "../models/userModel.js"
 
 
 //add products to user cart 
-const addToCart = async (req,res) => {
+const addToCart = async (req, res) => {
     try {
         const { userId, itemId, size } = req.body
 
@@ -14,14 +14,14 @@ const addToCart = async (req,res) => {
                 cartData[itemId][size] += 1
             }
             else {
-                cartData[itemId][size] = 1 
+                cartData[itemId][size] = 1
             }
         } else {
             cartData[itemId] = {}
-            cartData[itemId][size] = 1 
+            cartData[itemId][size] = 1
         }
 
-        await userModel.findByIdAndUpdate(userId, {cartData})
+        await userModel.findByIdAndUpdate(userId, { cartData })
         res.json({ success: true, message: "Added to Cart" })
 
     } catch (error) {
@@ -31,7 +31,7 @@ const addToCart = async (req,res) => {
 }
 
 //add products to user cart 
-const updateCart = async (req,res) => {
+const updateCart = async (req, res) => {
     try {
 
         const { userId, itemId, size, quantity } = req.body
@@ -41,9 +41,9 @@ const updateCart = async (req,res) => {
 
         cartData[itemId][size] = quantity
 
-        await userModel.findByIdAndUpdate(userId, {cartData})
-        res.json({success: true, message: 'Cart Updated' })
-        
+        await userModel.findByIdAndUpdate(userId, { cartData })
+        res.json({ success: true, message: 'Cart Updated' })
+
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
@@ -51,8 +51,8 @@ const updateCart = async (req,res) => {
 }
 
 //get user cart data 
-const getUserCart = async (req,res) => {
-    
+const getUserCart = async (req, res) => {
+
     try {
 
         const { userId } = req.body
@@ -60,13 +60,13 @@ const getUserCart = async (req,res) => {
         const userData = await userModel.findById(userId)
         let cartData = await userData.cartData;
 
-        res.json({ success: true, cartData })  
+        res.json({ success: true, cartData })
 
-    } catch(error) {
+    } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
 }
 
 
-export {addToCart, updateCart, getUserCart }
+export { addToCart, updateCart, getUserCart }

@@ -8,6 +8,14 @@ const connectDB = async () => {
         console.log("DB Connected");
     })
 
+    mongoose.connection.on('error', (err) => {
+        console.error("DB Connection Error: ", err);
+    })
+
+    mongoose.connection.on('disconnected', () => {
+        console.log("DB Disconnected");
+    })
+
    await mongoose.connect(process.env.MONGODB_URI);
 
 }

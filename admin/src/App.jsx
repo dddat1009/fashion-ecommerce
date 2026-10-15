@@ -12,6 +12,10 @@ import Dashboard from './pages/Dashboard.jsx'
 import AddVoucher from './pages/AddVoucher.jsx'
 import ListVoucher from './pages/ListVoucher.jsx'
 import EditVoucher from './pages/EditVoucher.jsx'
+import ShopProfile from './pages/ShopProfile.jsx'
+import Withdrawal from './pages/Withdrawal.jsx'
+import Warehouse from './pages/Warehouse.jsx'
+import Inventory from './pages/Inventory.jsx'
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
 export const currency = '$'
@@ -19,21 +23,23 @@ export const currency = '$'
 const App = () => {
 
   const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : '');
+  const [role, setRole] = useState(localStorage.getItem('role') ? localStorage.getItem('role') : '');
 
   useEffect(() => {
     localStorage.setItem('token', token)
-  }, [token])
+    localStorage.setItem('role', role)
+  }, [token, role])
   return (
     <div className='bg-gray-50 min-h-screen'>
       <ToastContainer />
       {token === ""
-        ? <Login setToken={setToken} />
+        ? <Login setToken={setToken} setRole={setRole} />
         :
         <>
-          <Navbar setToken={setToken} />
+          <Navbar setToken={setToken} setRole={setRole} />
           <hr />
           <div className='flex w-full'>
-            <Sidebar />
+            <Sidebar role={role} />
             <div className='w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-gray-600 text-base'>
               <Routes>
                 <Route path='/dashboard' element={<Dashboard token={token} />} />
@@ -44,6 +50,10 @@ const App = () => {
                 <Route path='/add-voucher' element={<AddVoucher token={token} />} />
                 <Route path='/list-voucher' element={<ListVoucher token={token} />} />
                 <Route path='/edit-voucher/:id' element={<EditVoucher token={token} />} />
+                <Route path='/shop-profile' element={<ShopProfile token={token} />} />
+                <Route path='/withdrawal' element={<Withdrawal token={token} role={role} />} />
+                <Route path='/warehouse' element={<Warehouse token={token} role={role} />} />
+                <Route path='/inventory' element={<Inventory token={token} role={role} />} />
               </Routes>
 
             </div>

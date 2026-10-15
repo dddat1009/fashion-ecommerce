@@ -2,17 +2,33 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
-const Login = ({setToken}) => {
+const Login = ({setToken, setRole}) => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isSeller, setIsSeller] = useState(false) // Toggle: Đăng nhập với tư cách người bán
 
   const onSubmitHandler = async (e) => {
-
     try {
       e.preventDefault();
-      const response = await axios.post(backendUrl + '/api/user/admin', { email, password })
+      
+      const endpoint = isSeller ? '/api/user/login' : '/api/user/admin';
+      const response = await axios.post(backendUrl + endpoint, { email, password })
+      
       if (response.data.success) {
+          // Nếu đăng nhập Seller thành công, kiểm tra xem có đúng là seller/admin không
+          if (isSeller) {
+            const role = response.data.role;
+            if (role !== 'seller' && role !== 'admin') {
+              toast.error('Tài khoản này không có quyền truy cập Người bán!');
+              return;
+            }
+            setRole(role);
+          } else {
+            // Đăng nhập bằng Admin tĩnh (.env)
+            setRole('admin');
+          }
+          
           setToken(response.data.token)
       } else {
         toast.error(response.data.message)
@@ -27,7 +43,23 @@ const Login = ({setToken}) => {
   return (
     <div className='min-h-screen flex items-center justify-center w-full '>
       <div className='bg-white shadow-md rounded-lg px-8 py-6 max-w-md'>
-        <h1 className='text-2xl font-bold mb-4 '>Admin Panel</h1>
+        
+        {/* Toggle Chọn Vai Trò */}
+        <div className='flex justify-center gap-4 mb-6 border-b pb-2'>
+          <button 
+            onClick={() => setIsSeller(false)}
+            className={`font-semibold ${!isSeller ? 'text-black border-b-2 border-black' : 'text-gray-400'}`}
+          >
+            Admin Panel
+          </button>
+          <button 
+            onClick={() => setIsSeller(true)}
+            className={`font-semibold ${isSeller ? 'text-black border-b-2 border-black' : 'text-gray-400'}`}
+          >
+            Seller Panel
+          </button>
+        </div>
+
         <form onSubmit={onSubmitHandler}>
           <div className='mb-3 min-w-72 '>
             <p className='text-sm font-medium text-gray-700 mb-2'>Email Address</p>

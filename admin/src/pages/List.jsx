@@ -11,7 +11,7 @@ const List = ({ token }) => {
   const fetchList = async () => {
     try {
 
-      const response = await axios.get(backendUrl + '/api/product/list')
+      const response = await axios.get(backendUrl + '/api/product/seller-list', { headers: { token } })
       if (response.data.success) {
         setlist(response.data.products);
       }

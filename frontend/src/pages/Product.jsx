@@ -3,27 +3,32 @@ import { ShopContext } from '../context/ShopContext';
 import { useParams } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import RelatedProducts from '../components/RelatedProducts';
+import axios from 'axios';
+
 const Product = () => {
 
   const {productId} = useParams();
-  const {products,currency,addToCart} = useContext(ShopContext);
+  const {products,currency,addToCart,backendUrl} = useContext(ShopContext);
   const [productData,setProductData] = useState(false); 
   const [image,setImage] = useState('')
   const [size,setSize] = useState('')
+  const [stockBySize, setStockBySize] = useState({});
 
-  const fetchProductData = async () => {
-    
-    products.map((item)=>{
-      if (item._id === productId) {
-        setProductData(item)
-        setImage(item.image[0])
-        return null;
+  const fetchProductStock = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/inventory/stock/${productId}`);
+      if (response.data.success) {
+        setStockBySize(response.data.stockBySize || {});
       }
-    })
-  }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(()=>{
     fetchProductData();
+    fetchProductStock();
+    setSize('');
   },[productId,products])
 
   return productData ? ( 
@@ -49,6 +54,9 @@ const Product = () => {
         {/* ---------product infor ----------*/}
         <div className='flex-1'>
             <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
+            <p className='text-sm text-gray-500 mt-1 mb-2'>
+                Được bán bởi: <span className='text-black font-semibold'>{productData.shopInfo ? productData.shopInfo.name : 'Forever Store'}</span>
+            </p>
             <div className='flex items-center gap-1 mt-2'>
                 <img src={assets.star_icon} alt="" className="w-3 5" />
                 <img src={assets.star_icon} alt="" className="w-3 5" />
@@ -60,14 +68,82 @@ const Product = () => {
             <p className='mt-5 text-3xl font-medium '>{currency}{productData.price}</p>
             <p className='mt-5 text-gray-500 md:w-4/5'>{productData.description}</p>
             <div className='flex flex-col gap-4 my-8'>
-                <p>Select Size</p>
-                <div className='flex gap-2'>
-                  {productData.sizes.map((item,index)=>(
-                    <button onClick={()=>setSize(item)} className={`border py-2 px-4 bg-gray-100 ${item === size ? 'border-orange-500' : ''}`} key={index}>{item}</button>
-                  ))}
+                <p className='font-medium text-sm text-gray-700'>Chọn Kích Cỡ (Size):</p>
+                <div className='flex flex-wrap gap-2'>
+                  {productData.sizes.map((item, index) => {
+                    const hasStockRecord = stockBySize[item] !== undefined;
+                    const stockQty = hasStockRecord ? stockBySize[item] : null;
+                    const isOutOfStock = stockQty !== null && stockQty <= 0;
+
+                    return (
+                      <button 
+                        key={index}
+                        disabled={isOutOfStock}
+                        onClick={() => setSize(item)} 
+                        className={`relative border py-2 px-4 text-sm font-medium transition ${
+                          item === size 
+                            ? 'border-orange-500 bg-orange-50 text-orange-600' 
+                            : isOutOfStock
+                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed line-through'
+                            : 'bg-gray-50 border-gray-300 hover:border-gray-400 text-gray-800'
+                        }`}
+                        title={isOutOfStock ? `Size ${item} hiện đã hết hàng` : stockQty !== null ? `Còn ${stockQty} sản phẩm` : ''}
+                      >
+                        {item}
+                        {isOutOfStock && (
+                          <span className='absolute -top-2 -right-1 text-[9px] bg-red-500 text-white px-1.5 py-0.2 rounded-full font-bold shadow-xs'>
+                            Hết
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+
+                {/* Trạng thái tồn kho của size đang chọn */}
+                {size && (
+                  <div className='text-xs mt-1'>
+                    {stockBySize[size] !== undefined ? (
+                      stockBySize[size] > 10 ? (
+                        <p className='text-green-600 font-medium flex items-center gap-1'>
+                          <span>✓</span> Còn hàng trong kho ({stockBySize[size]} sản phẩm có sẵn)
+                        </p>
+                      ) : stockBySize[size] > 0 ? (
+                        <p className='text-amber-600 font-semibold flex items-center gap-1'>
+                          <span>⚡</span> Sắp hết hàng! Chỉ còn {stockBySize[size]} sản phẩm
+                        </p>
+                      ) : (
+                        <p className='text-red-500 font-semibold flex items-center gap-1'>
+                          <span>✕</span> Size {size} hiện tại đã hết hàng
+                        </p>
+                      )
+                    ) : (
+                      <p className='text-gray-400'>Đang kiểm tra tồn kho...</p>
+                    )}
+                  </div>
+                )}
             </div>
-            <button onClick={()=>addToCart(productData._id,size)} className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'>ADD TO CART</button>
+
+            {/* Nút Thêm vào giỏ hàng */}
+            {(() => {
+              const isSelectedSizeOutOfStock = size && stockBySize[size] !== undefined && stockBySize[size] <= 0;
+              return (
+                <button 
+                  disabled={isSelectedSizeOutOfStock}
+                  onClick={() => {
+                    if (isSelectedSizeOutOfStock) return;
+                    addToCart(productData._id, size);
+                  }} 
+                  className={`px-8 py-3 text-sm font-medium transition ${
+                    isSelectedSizeOutOfStock
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-black text-white active:bg-gray-700 hover:bg-gray-900'
+                  }`}
+                >
+                  {isSelectedSizeOutOfStock ? 'HẾT HÀNG' : 'ADD TO CART'}
+                </button>
+              );
+            })()}
             <hr className='mt-8 sm:w-4/5'/>
             <div className='text-sm text-gray-500 mt-5 flex flex-col gap-1'>
               <p>100% Original product</p>
